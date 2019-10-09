@@ -61,15 +61,21 @@ fun prepareCommandProcess(
     command: String,
     args: ProcessBuilderArgs
 ): ProcessBuilder {
-    val commandPartsSize = 4
     val workingDir = File(args.workingDirPath)
-    val commandParts = command.trim().split("\\s".toRegex(), commandPartsSize).toTypedArray()
-
+    val commandParts = trimCommandToParts(command)
     val processBuilder = ProcessBuilder(*commandParts).directory(workingDir)
 
     processBuilder.forwardStd(args)
 
     return processBuilder;
+}
+
+fun trimCommandToParts(command: String): Array<String> {
+    val commandPart = command.trim().split("\\s(?=')".toRegex()).toTypedArray()[0]
+    val commentPart = arrayOf(command.trim().split("\\s(?=')".toRegex()).toTypedArray()[1])
+    val trimmedCommandPart = commandPart.trim().split("\\s".toRegex()).toTypedArray()
+    val allCommandParts = trimmedCommandPart + commentPart
+    return allCommandParts
 }
 
 fun ProcessBuilder.forwardStd(args: ProcessBuilderArgs) : ProcessBuilder {
