@@ -7,6 +7,8 @@ import java.io.InputStreamReader
 import java.util.concurrent.Executors
 import java.util.function.Consumer
 
+//INCLUDE ./https://raw.githubusercontent.com/cosysoft-ru/kotlin-script-utils/master/argument-tokenizer.kts
+
 // Содержит общие функции исполнения shell команд из kotlin путем оборачивания строк с командами в отдельные процессы.
 
 operator fun String.invoke(workingDirPath: String = ".",
@@ -62,20 +64,12 @@ fun prepareCommandProcess(
     args: ProcessBuilderArgs
 ): ProcessBuilder {
     val workingDir = File(args.workingDirPath)
-    val commandParts = trimCommandToParts(command)
+    val commandParts = ArgumentTokenizer.tokenize(command).toTypedArray()
     val processBuilder = ProcessBuilder(*commandParts).directory(workingDir)
 
     processBuilder.forwardStd(args)
 
     return processBuilder;
-}
-
-fun trimCommandToParts(command: String): Array<String> {
-    val commandPart = command.trim().split("\\s(?=')".toRegex()).toTypedArray()[0]
-    val commentPart = arrayOf(command.trim().split("\\s(?=')".toRegex()).toTypedArray()[1])
-    val trimmedCommandPart = commandPart.trim().split("\\s".toRegex()).toTypedArray()
-    val allCommandParts = trimmedCommandPart + commentPart
-    return allCommandParts
 }
 
 fun ProcessBuilder.forwardStd(args: ProcessBuilderArgs) : ProcessBuilder {
