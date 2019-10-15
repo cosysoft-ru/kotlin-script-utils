@@ -7,7 +7,7 @@ import java.io.InputStreamReader
 import java.util.concurrent.Executors
 import java.util.function.Consumer
 
-//INCLUDE ./argument-tokenizer.kts
+//INCLUDE https://raw.githubusercontent.com/cosysoft-ru/kotlin-script-utils/master/argument-tokenizer.kts
 
 // Содержит общие функции исполнения shell команд из kotlin путем оборачивания строк с командами в отдельные процессы.
 
