@@ -14,8 +14,8 @@ import java.util.function.Consumer
 operator fun String.invoke(workingDirPath: String = ".",
                            outputFilePath: String = "",
                            errorFilePath: String = "",
-                           redirectErrorToOutput: Boolean = false
-): ShellCommandResult {
+                           redirectErrorToOutput: Boolean = false): ShellCommandResult
+{
     val processBuilder = prepareCommandProcess(
         this,
         ProcessBuilderArgs(
@@ -29,40 +29,10 @@ operator fun String.invoke(workingDirPath: String = ".",
     return result
 }
 
-data class ShellCommandResult(
-    val statusCode: Int,
-    val stdOutput: String,
-    val stdError: String
-)
-
-data class ProcessBuilderArgs(
-    val workingDirPath: String = ".",
-    val outputFilePath: String = "",
-    val errorFilePath: String = "",
-    val redirectErrorToOutput: Boolean = false
-) {
-    init {
-        this.validateArgs(
-            errorFilePath,
-            redirectErrorToOutput
-        )
-    }
-
-    private fun validateArgs(errorFilePath: String,
-                             redirectErrorToOutput: Boolean
-    ) {
-        val isErrFile = errorFilePath.isNotBlank()
-        val errFileWhileOutputRedirect = isErrFile && redirectErrorToOutput
-        if (errFileWhileOutputRedirect) {
-            throw IllegalArgumentException("Can not redirect sdterr to stdout if file for sdterr provided")
-        }
-    }
-}
-
 fun prepareCommandProcess(
     command: String,
-    args: ProcessBuilderArgs
-): ProcessBuilder {
+    args: ProcessBuilderArgs): ProcessBuilder
+{
     val workingDir = File(args.workingDirPath)
     val commandParts = ArgumentTokenizer.tokenize(command).toTypedArray()
     val processBuilder = ProcessBuilder(*commandParts).directory(workingDir)
@@ -103,6 +73,37 @@ fun ProcessBuilder.execute() : ShellCommandResult {
     process.waitFor()
 
     return ShellCommandResult(process.exitValue(), outputContent.joinToString("\n"), errorContent.joinToString("\n"))
+}
+
+data class ShellCommandResult(
+        val statusCode: Int,
+        val stdOutput: String,
+        val stdError: String
+)
+
+data class ProcessBuilderArgs(
+        val workingDirPath: String = ".",
+        val outputFilePath: String = "",
+        val errorFilePath: String = "",
+        val redirectErrorToOutput: Boolean = false)
+{
+
+    init {
+        this.validateArgs(
+                errorFilePath,
+                redirectErrorToOutput
+        )
+    }
+    private fun validateArgs(errorFilePath: String,
+                             redirectErrorToOutput: Boolean)
+    {
+        val isErrFile = errorFilePath.isNotBlank()
+        val errFileWhileOutputRedirect = isErrFile && redirectErrorToOutput
+        if (errFileWhileOutputRedirect) {
+            throw IllegalArgumentException("Can not redirect sdterr to stdout if file for sdterr provided")
+        }
+    }
+
 }
 
 class StreamGobbler(
